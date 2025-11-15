@@ -30,7 +30,7 @@ public class Rsa {
         System.out.println("Results: ");
 
         // LOOP OVER THE BIT LENGTH HERE
-        for (int bitIter = 16; bitIter <= 20; bitIter++) {
+        for (int bitIter = 16; bitIter <= 32; bitIter++) {
             bitLength = bitIter;
 
             int trials = 3;
