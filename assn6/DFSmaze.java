@@ -96,10 +96,14 @@ public class DFSmaze {
         }
     }
     
-    private static void printMaze(char[][] maze) {
+    private static void printMaze(char[][] maze, int playerRow, int playerCol) {
         for (int i = 0; i < maze.length; i++) {
             for (int j = 0; j < maze[0].length; j++) {
-                System.out.print(maze[i][j] + " ");
+                if (i == playerRow && j == playerCol) {
+                    System.out.print("@ ");
+                } else {
+                    System.out.print(maze[i][j] + " ");
+                }
             }
             System.out.println();
         }
