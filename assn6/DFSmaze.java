@@ -17,6 +17,29 @@ public class DFSmaze {
         printMaze(maze);
 
     }
+    
+    private int[] getMazeSizeFromUser(Scanner s) {
+        System.out.println("1) Small  (11 x 21)");
+        System.out.println("2) Medium (21 x 41)");
+        System.out.println("3) Large  (41 x 61)");
+        System.out.println();
+        System.out.print("Choose maze size: ");
+        
+        int choice = s.nextInt();
+
+        // Return the selected size
+        if (choice == 1) {
+            return new int[] {11, 21};
+        } else if (choice == 2) {
+            return new int[] {21, 41};
+        } else if (choice == 3) {
+            return new int[] {41, 61};
+        } else {
+            // Bad input, ask again
+            System.out.println("Invalid choice. Please try again.");
+            return getMazeSizeFromUser(s);
+        }
+    }
 
     private static char[][] generateMaze(int rows, int cols, Random rand) {
         // create maze filled with walls (#), and carve out path using DFS
