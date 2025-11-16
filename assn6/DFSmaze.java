@@ -5,7 +5,7 @@ public class DFSmaze {
     private static final int[] dr = {-1, 1, 0, 0};  // change in row for N, S, W, E
     private static final int[] dc = {0, 0, -1, 1};  // change in column for N, S, W, E
 
-    
+
     public static void main (String [] args) {
         Random rand = new Random();
 
@@ -18,14 +18,14 @@ public class DFSmaze {
 
         playGame(maze, s);
     }
-    
+
     private static int[] getMazeSizeFromUser(Scanner s) {
         System.out.println("1) Small  (11 x 11)");
         System.out.println("2) Medium (21 x 21)");
         System.out.println("3) Large  (31 x 31)");
         System.out.println();
         System.out.print("Choose maze size: ");
-        
+
         int choice = s.nextInt();
 
         // Return the selected size
@@ -57,7 +57,7 @@ public class DFSmaze {
         // open "entry" and "exit" cells
         maze[1][0] = '.';
         maze[rows-2][cols-1] = '.';
-        
+
         return maze;
 
     }
@@ -96,7 +96,7 @@ public class DFSmaze {
             }
         }
     }
-    
+
     private static void printMaze(char[][] maze, int playerRow, int playerCol) {
         for (int i = 0; i < maze.length; i++) {
             for (int j = 0; j < maze[0].length; j++) {
@@ -109,6 +109,29 @@ public class DFSmaze {
             System.out.println();
         }
     }
+    private static void printView(char[][] maze, int pr, int pc) {
+        for (int rOffset = -1; rOffset <= 1; rOffset++) {
+            for (int cOffset = -1; cOffset <= 1; cOffset++) {
+                int r = pr + rOffset;
+                int c = pc + cOffset;
+
+                boolean inBounds = (r >= 0 && r < maze.length &&
+                c >= 0 && c < maze[0].length);
+
+                if (inBounds && r == pr && c == pc) {
+                    // Player in the center (or wherever their actual position is)
+                    System.out.print("@ ");
+                } else if (inBounds) {
+                    // Show the actual maze cell
+                    System.out.print(maze[r][c] + " ");
+                } else {
+                    // Outside the maze: treat as solid wall
+                    System.out.print("# ");
+                }
+            }
+            System.out.println();
+        }
+    }
 
     private static void playGame(char[][] maze, Scanner s) {
         int playerRow= 1;
@@ -116,10 +139,12 @@ public class DFSmaze {
 
         // game loop
         while (true) {
-            printMaze(maze, playerRow, playerCol);
+            printView(maze, playerRow, playerCol);
 
             System.out.print("Move (W/A/S/D, Q to quit): ");
             char move = Character.toLowerCase(s.next().charAt(0));
+            
+            clearScreen();
 
             if (move == 'q') {
                 System.out.println("Quitting game. Goodbye!");
@@ -141,11 +166,11 @@ public class DFSmaze {
 
             // bounds check
             if (newRow < 0 || newRow >= maze.length ||
-                newCol < 0 || newCol >= maze[0].length) {
+            newCol < 0 || newCol >= maze[0].length) {
                 System.out.println("You can't walk off the map!");
                 continue;
             }
-            
+
             // wall check
             if (maze[newRow][newCol] == '#') {
                 System.out.println("You ran into a wall.");
@@ -155,14 +180,18 @@ public class DFSmaze {
             // move is valid
             playerRow = newRow;
             playerCol = newCol;
-            
+
             // check if victory condition
             if (playerRow == maze.length - 2 && playerCol == maze[0].length - 1) {
-                printMaze(maze, playerRow, playerCol);
+                printView(maze, playerRow, playerCol);
                 System.out.println("You won!");
                 break;
             }
         }
     }
 
+    private static void clearScreen() {
+        System.out.print("\033[H\033[2J");
+        System.out.flush();
+    }
 }
