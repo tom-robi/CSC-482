@@ -7,21 +7,21 @@ public class DFSmaze {
 
     
     public static void main (String [] args) {
-        int rows = 11;
-        int cols = 21;
-
         Random rand = new Random();
 
+        Scanner s = new Scanner(System.in);
+        int[] size = getMazeSizeFromUser(s);
+        int rows = size[0];
+        int cols = size[1];
 
         char[][] maze = generateMaze(rows, cols, rand);
         printMaze(maze);
-
     }
     
-    private int[] getMazeSizeFromUser(Scanner s) {
-        System.out.println("1) Small  (11 x 21)");
-        System.out.println("2) Medium (21 x 41)");
-        System.out.println("3) Large  (41 x 61)");
+    private static int[] getMazeSizeFromUser(Scanner s) {
+        System.out.println("1) Small  (11 x 11)");
+        System.out.println("2) Medium (21 x 21)");
+        System.out.println("3) Large  (31 x 31)");
         System.out.println();
         System.out.print("Choose maze size: ");
         
@@ -29,11 +29,11 @@ public class DFSmaze {
 
         // Return the selected size
         if (choice == 1) {
-            return new int[] {11, 21};
+            return new int[] {11, 11};
         } else if (choice == 2) {
-            return new int[] {21, 41};
+            return new int[] {21, 21};
         } else if (choice == 3) {
-            return new int[] {41, 61};
+            return new int[] {31, 31};
         } else {
             // Bad input, ask again
             System.out.println("Invalid choice. Please try again.");
