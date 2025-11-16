@@ -38,7 +38,7 @@ public class DFSmaze {
 
     private static void dfsCarve(int r, int c, char[][] maze, Random rand) {
         // create start point
-        maze[1][1] = '.';
+        maze[r][c] = '.';
         // directions representing N, S, E and W
         int[] directions = {0, 1, 2, 3};
 
@@ -54,7 +54,7 @@ public class DFSmaze {
         // choose cell 2 steps away in random direction 
         // if valid (within bounds and not visited), remove wall between old and
         //     new node, and repeat the process
-        for (int i = directions.length - 1; i > 0; i--) {
+        for (int i = directions.length - 1; i >= 0; i--) {
             int dir = directions[i];
             int newR = r + 2*dr[dir];
             int newC = c + 2*dc[dir];
