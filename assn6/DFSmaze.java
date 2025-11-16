@@ -15,7 +15,8 @@ public class DFSmaze {
         int cols = size[1];
 
         char[][] maze = generateMaze(rows, cols, rand);
-        printMaze(maze);
+
+        playGame(maze, s);
     }
     
     private static int[] getMazeSizeFromUser(Scanner s) {
@@ -106,6 +107,61 @@ public class DFSmaze {
                 }
             }
             System.out.println();
+        }
+    }
+
+    private static void playGame(char[][] maze, Scanner s) {
+        int playerRow= 1;
+        int playerCol = 0;
+
+        // game loop
+        while (true) {
+            printMaze(maze, playerRow, playerCol);
+
+            System.out.print("Move (W/A/S/D, Q to quit): ");
+            char move = Character.toLowerCase(s.next().charAt(0));
+
+            if (move == 'q') {
+                System.out.println("Quitting game. Goodbye!");
+                break;
+            }
+
+            int dRow = 0, dCol = 0;
+            if (move == 'w') dRow = -1;     // up
+            else if (move == 's') dRow = 1; // down
+            else if (move == 'a') dCol = -1; // left
+            else if (move == 'd') dCol = 1; // right
+            else {
+                System.out.println("Invalid key. Use W/A/S/D.");
+                continue;
+            }
+
+            int newRow = playerRow + dRow;
+            int newCol = playerCol + dCol;
+
+            // bounds check
+            if (newRow < 0 || newRow >= maze.length ||
+                newCol < 0 || newCol >= maze[0].length) {
+                System.out.println("You can't walk off the map!");
+                continue;
+            }
+            
+            // wall check
+            if (maze[newRow][newCol] == '#') {
+                System.out.println("You ran into a wall.");
+                continue;
+            }
+
+            // move is valid
+            playerRow = newRow;
+            playerCol = newCol;
+            
+            // check if victory condition
+            if (playerRow == maze.length - 2 && playerCol == maze[0].length - 1) {
+                printMaze(maze, playerRow, playerCol);
+                System.out.println("You won!");
+                break;
+            }
         }
     }
 
