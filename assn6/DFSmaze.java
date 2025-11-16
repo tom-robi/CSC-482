@@ -30,6 +30,9 @@ public class DFSmaze {
         }
         dfsCarve(1, 1, maze, rand);
 
+        // open "entry" and "exit" cells
+        maze[1][0] = '.';
+        maze[rows-2][cols-1] = '.';
         
         return maze;
 
