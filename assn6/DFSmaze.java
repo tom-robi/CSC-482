@@ -4,19 +4,31 @@ public class DFSmaze {
 
     private static final int[] dr = {-1, 1, 0, 0};  // change in row for N, S, W, E
     private static final int[] dc = {0, 0, -1, 1};  // change in column for N, S, W, E
-
+    private static char[][] hintMaze = null;
+    private static boolean hintPathComputed = false;
+    private static int goalRow;
+    private static int goalCol;
 
     public static void main (String [] args) {
         Random rand = new Random();
 
         Scanner s = new Scanner(System.in);
-        int[] size = getMazeSizeFromUser(s);
-        int rows = size[0];
-        int cols = size[1];
 
-        char[][] maze = generateMaze(rows, cols, rand);
+        while (true) {
 
-        playGame(maze, s);
+            int[] size = getMazeSizeFromUser(s);
+            int rows = size[0];
+            int cols = size[1];
+
+            char[][] maze = generateMaze(rows, cols, rand);
+
+            playGame(maze, s);
+
+            System.out.println("Would you like to play again? (Y, N)");
+            char choice = Character.toLowerCase(s.next().charAt(0));
+            if (choice == 'y') continue;
+            else break;
+        }
     }
 
     private static int[] getMazeSizeFromUser(Scanner s) {
@@ -54,14 +66,16 @@ public class DFSmaze {
         }
         dfsCarve(1, 1, maze, rand);
 
+        // save exit row for convenience
+        goalRow = rows - 2;
+        goalCol = cols - 1;
+
         // open "entry" and "exit" cells
         maze[1][0] = '.';
-        maze[rows-2][cols-1] = '.';
+        maze[goalRow][goalCol] = '.';
 
         return maze;
-
     }
-
 
     private static void dfsCarve(int r, int c, char[][] maze, Random rand) {
         // create start point
@@ -97,6 +111,53 @@ public class DFSmaze {
         }
     }
 
+    private static boolean dfsHintPath(char[][] maze, int r, int c, 
+                                   boolean[][] visited, 
+                                   char[][] hintMaze) {
+        // check if within bounds, is wall, or visited
+        if (r < 0 || r >= maze.length || c < 0 || c >= maze[0].length) return false;
+        if (maze[r][c] == '#') return false;
+        if (visited[r][c]) return false;
+
+        visited[r][c] = true;
+
+        if (r == goalRow && c == goalCol) {
+            hintMaze[r][c] = '+';
+            return true;
+        }
+
+        for (int k = 0; k < 4; k++) {
+            int nr = r + dr[k];
+            int nc = c + dc[k];
+
+            if (dfsHintPath(maze, nr, nc, visited, hintMaze)) {
+                // on path to goal
+                hintMaze[r][c] = '+';
+                return true;
+            }
+        }
+
+        // no path
+        return false;
+    } 
+
+    private static void computeHintPath(char[][] maze) {
+        if (hintPathComputed) return; // we are finished
+
+        hintMaze = copyMaze(maze);
+        boolean[][] visited = new boolean[maze.length][maze[0].length];
+
+        int startRow = 1;
+        int startCol = 0; // entry point
+
+        boolean ok = dfsHintPath(maze, startRow, startCol, visited, hintMaze);
+        if (!ok) {
+            System.out.println("No path from start to goal.");
+        } else {
+            hintPathComputed = true;
+        }
+    }
+
     private static void printMaze(char[][] maze, int playerRow, int playerCol) {
         for (int i = 0; i < maze.length; i++) {
             for (int j = 0; j < maze[0].length; j++) {
@@ -109,7 +170,8 @@ public class DFSmaze {
             System.out.println();
         }
     }
-    private static void printView(char[][] maze, int pr, int pc) {
+
+    private static void printView(char[][] maze, int pr, int pc, boolean showHint) {
         for (int rOffset = -1; rOffset <= 1; rOffset++) {
             for (int cOffset = -1; cOffset <= 1; cOffset++) {
                 int r = pr + rOffset;
@@ -122,8 +184,13 @@ public class DFSmaze {
                     // Player in the center (or wherever their actual position is)
                     System.out.print("@ ");
                 } else if (inBounds) {
-                    // Show the actual maze cell
-                    System.out.print(maze[r][c] + " ");
+                    // hint overlay if requested
+                    if (showHint && hintMaze != null && hintMaze[r][c] == '+') {
+                        System.out.print("+ ");
+                    } else {
+                        // Show the actual maze cell
+                        System.out.print(maze[r][c] + " ");
+                    }
                 } else {
                     // Outside the maze: treat as solid wall
                     System.out.print("# ");
@@ -136,12 +203,15 @@ public class DFSmaze {
     private static void playGame(char[][] maze, Scanner s) {
         int playerRow= 1;
         int playerCol = 0;
+        boolean showHint = false;
+
+        clearScreen();
 
         // game loop
         while (true) {
-            printView(maze, playerRow, playerCol);
+            printView(maze, playerRow, playerCol, showHint);
 
-            System.out.print("Move (W/A/S/D, Q to quit): ");
+            System.out.print("Move (W/A/S/D, H for hint, Q to quit): ");
             char move = Character.toLowerCase(s.next().charAt(0));
             
             clearScreen();
@@ -149,6 +219,15 @@ public class DFSmaze {
             if (move == 'q') {
                 System.out.println("Quitting game. Goodbye!");
                 break;
+            }
+
+            if (move == 'h') {
+                // compute one, then toggle view
+                if (!hintPathComputed) {
+                    computeHintPath(maze);
+                }
+                showHint = !showHint; // can turn off if desired
+                continue;
             }
 
             int dRow = 0, dCol = 0;
@@ -183,7 +262,7 @@ public class DFSmaze {
 
             // check if victory condition
             if (playerRow == maze.length - 2 && playerCol == maze[0].length - 1) {
-                printView(maze, playerRow, playerCol);
+                printView(maze, playerRow, playerCol, showHint);
                 System.out.println("You won!");
                 break;
             }
@@ -194,4 +273,18 @@ public class DFSmaze {
         System.out.print("\033[H\033[2J");
         System.out.flush();
     }
+
+    private static char[][] copyMaze(char[][] maze) {
+        int rows = maze.length;
+        int cols = maze[0].length;
+        char[][] copy = new char[rows][cols];
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                copy[i][j] = maze[i][j];
+            }
+        }
+        return copy;
+    }
+
 }
+
